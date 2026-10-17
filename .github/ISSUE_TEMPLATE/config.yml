@@ -1,0 +1,5 @@
+blank_issues_enabled: false
+contact_links:
+  - name: 先搜一下有没有这道题
+    url: https://github.com/mali9527/HowToHackLife/blob/main/题库/README.md
+    about: 全部的题按领域列在这里；也可以下载仓库，用浏览器打开 index.html 检索。

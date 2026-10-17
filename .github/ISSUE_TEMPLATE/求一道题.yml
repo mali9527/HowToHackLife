@@ -1,0 +1,30 @@
+name: 求一道题
+description: 你遇到的事这里还没有题，想要一道
+title: "[求一道题] "
+labels: ["求一道题"]
+body:
+  - type: markdown
+    attributes:
+      value: 先搜一下有没有这道题。一道题只解决一个决定，全国的规定管得到的事才收；要人看病、打官司、投资的具体指令不收。
+  - type: input
+    id: question
+    attributes:
+      label: 你想问什么
+      description: 用你自己的话，一句
+      placeholder: "公司不给交社保，我能要求补吗？"
+    validations:
+      required: true
+  - type: textarea
+    id: situation
+    attributes:
+      label: 你碰到的情况
+      description: 什么时候、什么处境下要做这个决定；不用写个人信息
+    validations:
+      required: false
+  - type: input
+    id: hint
+    attributes:
+      label: 你知道的出处
+      description: 知道哪份文件、哪个平台的规则管这件事就写上，不知道空着
+    validations:
+      required: false

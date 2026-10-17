@@ -1,0 +1,36 @@
+name: 规则变了
+description: 一份文件或一个平台的规则改了、废了、出了新的
+title: "[规则变了] "
+labels: ["规则变了"]
+body:
+  - type: markdown
+    attributes:
+      value: 先搜一下有没有人提过。请给官方发布的链接。
+  - type: input
+    id: doc
+    attributes:
+      label: 哪份文件
+      description: 文件名和文号，或者哪个平台的哪条规则
+    validations:
+      required: true
+  - type: input
+    id: url
+    attributes:
+      label: 链接
+      description: 发布机关或平台自己的页面
+    validations:
+      required: true
+  - type: textarea
+    id: change
+    attributes:
+      label: 改了什么
+      description: 改动的那几条原文，写明从哪天起施行
+    validations:
+      required: false
+  - type: textarea
+    id: affects
+    attributes:
+      label: 影响哪些题
+      description: 题号，知道的话写上
+    validations:
+      required: false

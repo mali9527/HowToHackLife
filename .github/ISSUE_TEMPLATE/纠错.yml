@@ -1,0 +1,37 @@
+name: 纠错
+description: 答案或解析和官方原文对不上、规定变了、说宽了
+title: "[纠错] 第 题："
+labels: ["纠错"]
+body:
+  - type: markdown
+    attributes:
+      value: 先搜一下有没有人提过。依据必填，要官方的出处；自媒体、百科、别人的转述不收。
+  - type: input
+    id: no
+    attributes:
+      label: 题号
+      description: 页尾"第 NNNN 题"里的四位数字
+      placeholder: "0001"
+    validations:
+      required: true
+  - type: textarea
+    id: sentence
+    attributes:
+      label: 哪句话
+      description: 把页面上那句话原样贴过来，说说哪里不对
+    validations:
+      required: true
+  - type: input
+    id: url
+    attributes:
+      label: 官方出处的链接
+      description: 发布机关的官网、中国政府网、国家法律法规数据库、平台自己的规则页
+    validations:
+      required: true
+  - type: textarea
+    id: quote
+    attributes:
+      label: 原文怎么写
+      description: 原文里的那句话，逐字贴过来，写明第几条
+    validations:
+      required: true
