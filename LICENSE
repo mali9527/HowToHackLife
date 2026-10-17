@@ -7,7 +7,7 @@ Copyright (c) 马力及贡献者
    可以读，可以引用和改编，要署名（注明人生黑客 HowToHackLife 第几题、核对日期），不能商用，改编后的内容用同样的许可。
    协议全文：https://creativecommons.org/licenses/by-nc-sa/4.0/legalcode.zh-hans
 
-2. 代码：index.html 里的脚本和样式，按 MIT 许可授权。
+2. 代码：index.html 里的脚本和样式、.github/ 下的自动检查代码，按 MIT 许可授权。
    协议全文：https://opensource.org/license/mit
 
 每道题里摘录的法律法规原文不受著作权保护，可以自由使用。平台规则的摘录归各平台。

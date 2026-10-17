@@ -1,0 +1,15 @@
+name: 公开页面检查
+"on":
+  pull_request:
+permissions:
+  contents: read
+jobs:
+  check:
+    name: 格式和引用检查
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+          persist-credentials: false
+      - run: python3 .github/scripts/检查.py
