@@ -9,6 +9,7 @@ from pathlib import Path, PurePosixPath
 import re
 import subprocess
 import sys
+from urllib.parse import unquote
 
 RULES = [
     ("来源编号", r"S\d{4}"),
@@ -30,6 +31,7 @@ NUMBER_PATH_KINDS = {"来源编号", "断言号", "内部编号", "内部路径"
 PAGE_PATH = re.compile(r"题库/[^/]+/([0-9]{4})\.md")
 CITATION = re.compile(r"\[([0-9]+)\]")
 SOURCE_LINE = re.compile(r"^\[([0-9]+)\]\s+\S")
+LINK = re.compile(r'\]\((<[^>\n]+>|(?:\\.|[^()\\\n]|\([^()\n]*\))*)\)')
 
 
 def changed_files(root):
@@ -61,13 +63,38 @@ def changed_files(root):
 
 
 def file_kind(name):
-    if name == "题库/README.md":
+    if name in ("README.md", "题库/README.md") or re.fullmatch(r"题库/[^/]+/README\.md", name):
         return "索引"
     if name.startswith("题库/") and name.endswith(".md"):
         return "题页"
     if name in ("参考文献总表.md", "Hot100.md") or name.startswith("专题/"):
         return "索引"
     return None
+
+
+def check_links(root, name, lines):
+    root = root.resolve()
+    errors = []
+    for ln, line in enumerate(lines, 1):
+        for match in LINK.finditer(line):
+            target = match.group(1).strip()
+            if target.startswith("<") and target.endswith(">"):
+                target = target[1:-1]
+            else:
+                target = re.sub(r'\s+[\"\x27].*[\"\x27]$', '', target)
+            if target.lower().startswith(("http", "#", "mailto:")):
+                continue
+            local = unquote(target.split("#", 1)[0])
+            local = re.sub(r"\\([() ])", r"\1", local)
+            path = (root / name).parent / local
+            try:
+                path.resolve().relative_to(root)
+                valid = bool(local) and not Path(local).is_absolute() and path.is_file()
+            except (OSError, ValueError):
+                valid = False
+            if not valid:
+                errors.append((ln, "链接失效", target))
+    return errors
 
 
 def scan_leaks(lines, numbers_only=False):
@@ -158,16 +185,19 @@ def check_page(name, lines):
 
 def main():
     root = Path(__file__).resolve().parents[2]
+    all_names = [path.relative_to(root).as_posix() for directory in ("题库", "专题")
+                 for path in (root / directory).rglob("*") if path.is_file()]
+    all_names += [name for name in ("README.md", "参考文献总表.md", "Hot100.md")
+                  if (root / name).exists()]
     names = changed_files(root)
     if names is None:
         print("未取得改动清单，检查全库。")
-        names = [path.relative_to(root).as_posix() for directory in ("题库", "专题")
-                 for path in (root / directory).rglob("*") if path.is_file()]
-        names += [name for name in ("参考文献总表.md", "Hot100.md") if (root / name).exists()]
+        names = all_names
     else:
-        print("已取得改动清单，只检查改动的文件。")
+        print("已取得改动清单，格式与内部信息只检查改动文件；链接检查全库。")
+    selected = set(names)
     error_count = warning_count = checked = 0
-    for name in sorted(set(names)):
+    for name in sorted(selected | set(all_names)):
         kind = file_kind(name)
         if kind is None:
             continue
@@ -180,8 +210,10 @@ def main():
             print(f"{name}:1: 文件读取: 无法读取仓库内的 UTF-8 文件")
             error_count += 1
             continue
-        errors, warnings = check_page(name, lines) if kind == "题页" else ([], [])
-        errors += scan_leaks(lines, numbers_only=(kind != "题页"))
+        errors, warnings = check_page(name, lines) if kind == "题页" and name in selected else ([], [])
+        if name in selected:
+            errors += scan_leaks(lines, numbers_only=(kind != "题页"))
+        errors += check_links(root, name, lines)
         for ln, rule, context in errors + warnings:
             print(f"{name}:{ln}: {rule}: {context}")
         error_count += len(errors)
