@@ -29,7 +29,7 @@ RULES = [(kind, re.compile(pattern)) for kind, pattern in RULES]
 PROCESS_OK = re.compile(PROCESS_OK)
 NUMBER_PATH_KINDS = {"来源编号", "断言号", "内部编号", "内部路径"}
 PAGE_PATH = re.compile(r"题库/[^/]+/([0-9]{4})\.md")
-CITATION = re.compile(r"\[([0-9]+)\]")
+CITATION = re.compile(r"\[([0-9]{1,3})\]")
 SOURCE_LINE = re.compile(r"^\[([0-9]+)\]\s+\S")
 LINK = re.compile(r'\]\((<[^>\n]+>|(?:\\.|[^()\\\n]|\([^()\n]*\))*)\)')
 
