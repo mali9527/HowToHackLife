@@ -25,9 +25,27 @@ RULES = [
 ]
 PROCESS_OK = r"材料(进行)?复核|再复核|重新复核|复核材料|复核结果|申请复核|复核完毕|复核申请|认定复核|复核程序"
 UNCHECKED_LABEL = "没核到"
+PICKUP_KIND, PICKUP = "取件备注", "取件"
+PICKUP_TOOL = r"(?:原文|正文|网页|来源|文件|规则)(?:的)?取件|取件(?:工具|脚本|接口|日志|备注|预算|报告|结果|快照)"
 RULES = [(kind, re.compile(pattern)) for kind, pattern in RULES]
 PROCESS_OK = re.compile(PROCESS_OK)
 NUMBER_PATH_KINDS = {"来源编号", "断言号", "内部编号", "内部路径"}
+TOOL_RE = dict(RULES)[PICKUP_KIND]
+
+
+def delivery_pickup(line, match):
+    """退货物流里的上门、安排、延误、排期放行；句中另有工具备注词仍拦。"""
+    if match.group() != PICKUP:
+        return False
+    if line[max(0, match.start() - 2):match.start()] != "上门" and not re.match(r"安排|延误|排(?:在|到)", line[match.end():]):
+        return False
+    sentence = next((part.group() for part in re.finditer(r"[^。！？；!?;]+", line)
+                     if part.start() <= match.start() < part.end()), "")
+    if not re.search(r"退货|退回|承运商|快递|包裹", sentence):
+        return False
+    if re.search(PICKUP_TOOL, sentence):
+        return False
+    return not any(item.group() != PICKUP for item in TOOL_RE.finditer(sentence))
 PAGE_PATH = re.compile(r"题库/[^/]+/([0-9]{4})\.md")
 CITATION = re.compile(r"\[([0-9]{1,3})\]")
 SOURCE_LINE = re.compile(r"^\[([0-9]+)\]\s+\S")
@@ -121,6 +139,8 @@ def scan_leaks(lines, numbers_only=False):
                     continue
                 if kind == "内部流程" and PROCESS_OK.search(
                         line[max(0, match.start() - 8):match.end() + 2]):
+                    continue
+                if kind == PICKUP_KIND and delivery_pickup(line, match):
                     continue
                 findings.append((ln, kind, line[max(0, match.start() - 12):match.end() + 12]))
     return findings
